@@ -1,6 +1,7 @@
-import pandas as pd
 import sys
+import pandas as pd
 
+city = sys.argv[1]
 df = pd.read_json("output.json")
 
 # wybór kolumn
@@ -38,7 +39,7 @@ df = df.drop(columns = ["Adres"])
 # uporządkowanie nazwy Sopotu
 df.loc[df['Miasto'].str.contains('Sopot', case=False, na=False), 'Miasto'] = 'Sopot'
 
-# Dolny Sopot → wyczyszczenie
+# Dolny Sopot - wyczyszczenie
 df.loc[df['Dzielnica'] == 'Dolny Sopot', 'Dzielnica'] = ''
 df.loc[df['Dzielnica'] == 'Górny Sopot', 'Dzielnica'] = ''
 

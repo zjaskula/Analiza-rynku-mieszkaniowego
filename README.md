@@ -1,4 +1,4 @@
-# Analiza rynku mieszkań na sprzedaż w Trójmieście (Dashboard)
+# Analiza rynku mieszkaniowego
 
 ## Spis treści
 * [Charakterystyka oprogramowania](#charakterystyka-oprogramowania)
@@ -9,9 +9,9 @@
 * [Testy](#testy)
 
 ## Charakterystyka oprogramowania
-**Dashboard rynek nieruchomości** to aplikacja analityczna prezentująca podstawową analizę ofert mieszkań na sprzedaż publikowanych na portalu ogłoszeniowym Otodom.pl. System służy do eksploracji struktury rynku nieruchomości mieszkaniowych w Trójmieście w formie interaktywnego dashboardu. Aplikacja umożliwia pracę w dwóch trybach analizy:
-- **Dane historyczne** – zestaw danych obejmujący styczeń 2026 roku dla obszaru całego Trójmiasta.
-- **Dane bieżące (scraping na żywo)** – oferty pobierane dynamicznie dla jednego, wybranego miasta (Gdańsk, Gdynia lub Sopot) w zadanym przedziale czasowym: 1, 3 lub 7 dni.
+**Analiza rynku mieszkaniowego** to aplikacja analityczna prezentująca podstawową analizę ofert mieszkań na sprzedaż publikowanych na portalu ogłoszeniowym Otodom.pl. System służy do eksploracji struktury rynku nieruchomości mieszkaniowych w Trójmieście w formie interaktywnego dashboardu. Aplikacja umożliwia pracę w dwóch trybach analizy:
+- **dane historyczne** – zestaw danych obejmujący styczeń 2026 roku dla obszaru całego Trójmiasta.
+- **dane bieżące (webscraping na żywo)** – oferty pobierane dynamicznie dla jednego, wybranego miasta (Gdańsk, Gdynia lub Sopot) w zadanym przedziale czasowym: 1, 3 lub 7 dni.
 
 Użytkownik może zdecydować, czy chce analizować pełny zbiór historyczny dla całej aglomeracji (poprzez zaznaczenie odpowiedniego pola wyboru), czy skupić się na aktualnych ofertach z konkretnego miasta w krótkim zakresie czasu. Wszystkie wyniki prezentowane są w postaci interaktywnych wykresów oraz zagregowanych statystyk opisowych. Dashboard pełni funkcję eksploracyjną i porównawczą, wspierając analizę rynku mieszkaniowego w ujęciu przestrzennym i czasowym.
 
