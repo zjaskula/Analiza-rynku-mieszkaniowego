@@ -4,15 +4,15 @@ import streamlit as st
 import subprocess
 import plotly.express as px
 
-
 st.set_page_config(
     page_title="Dashboard – oferty mieszkań",
     page_icon=":house:",
-    layout="wide",)
+    layout="wide", )
 
 st.markdown('''<style>header {visibility: hidden;}</style>''', unsafe_allow_html=True)
 
-st.markdown("<h1 style='font-size: 50px; text-align: center; color: #052D73;'>Analiza ofert mieszkań na sprzedaż w Trójmieście</h1>",
+st.markdown(
+    "<h1 style='font-size: 50px; text-align: center; color: #052D73;'>Analiza ofert mieszkań na sprzedaż w Trójmieście</h1>",
     unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -33,7 +33,7 @@ st.markdown("""Aplikacja umożliwia analizę ofert mieszkań w Trójmieście z p
 zarówno dla danych z całego stycznia, jak i dla ofert pozyskanych na bieżąco. 
 Możesz wybrać miasto i zakres czasowy ofert i analizować bieżące oferty lub wyświetlić dane z całego Trójmiasta dla 
 stycznia 2026 (zaznacz :blue-background[checkbox]).  
-  
+
 Wszystkie statystyki są prezentowane w formie interaktywnych wykresów i podsumowań, pozwalając szybko zorientować się 
 w strukturze rynku mieszkań.""")
 
@@ -52,8 +52,7 @@ def base():
         col_one, col_two = st.columns(2)
         choice = col_one.selectbox("Miasto", ["–", "Gdańsk", "Gdynia", "Sopot"])
         time_posted = col_two.selectbox(
-            "Aktualność ofert", ["–", "Z ostatnich 24h", "Z ostatnich 3 dni", "Z ostatnich 7 dni"]
-        )
+            "Aktualność ofert", ["–", "Z ostatnich 24h", "Z ostatnich 3 dni", "Z ostatnich 7 dni"])
         submitted = st.form_submit_button("🔍 Szukaj")
 
         if submitted and not show_all:
@@ -65,7 +64,6 @@ def base():
             if choice != "–" or time_posted != "–":
                 st.warning("Wybierz albo konkretne miasto i ramy czasowe, albo zaznaczyć checkbox.")
                 return False
-
 
     if submitted:
         if show_all:
@@ -85,7 +83,7 @@ def base():
             }
             days_since_created_str = days_map.get(time_posted, "")
 
-            #wywołanie skryptów
+            # wywołanie skryptów
             with st.spinner("Trwa pobieranie ofert..."):
                 wynik = subprocess.call([sys.executable, "urls.py", city, days_since_created_str])
                 if wynik != 0:
@@ -107,7 +105,6 @@ def base():
 
     return submitted
 
-
 def data():
     mode = st.session_state.mode
     df = st.session_state.df
@@ -124,10 +121,10 @@ def data():
                 st.metric("Mediana powierzchni", f"{df['Powierzchnia'].median():.0f} m²")
 
             with cols[2]:
-                st.metric("Mediana cen", f"{df['Cena'].median():.0f} zł",)
+                st.metric("Mediana cen", f"{df['Cena'].median():.0f} zł", )
 
             with cols[3]:
-                st.metric("Mediana cen za metr", f"{df['Cena za metr'].median():.0f} zł/m²")
+                st.metric("Mediana cen za metr", f"{df['Cena_mkw'].median():.0f} zł/m²")
 
         # wykres 1: histogram
         def add_metraz(df: pd.DataFrame) -> pd.DataFrame:
@@ -137,7 +134,7 @@ def data():
             return df
 
         def top_dzielnice(df: pd.DataFrame, n=3):
-            agg = (df.groupby("Dzielnica")['Cena za metr'].median().dropna().sort_values())
+            agg = (df.groupby("Dzielnica")['Cena_mkw'].median().dropna().sort_values())
             cheapest = agg.head(n)
             expensive = agg.tail(n)
             result = pd.concat([cheapest, expensive]).reset_index()
@@ -161,11 +158,6 @@ def data():
             else:
                 df_filtered = df
                 color_arg = None
-            #     None
-                # miasta = df_work["Miasto"].dropna().unique()
-                # selected_city = st.radio("Miasto", options=miasta)
-                # df_filtered = df_work[df_work["Miasto"] == selected_city]
-                # color_arg = None
 
         cols = st.columns(2, gap="medium")
         with cols[0].container(border=True):
@@ -173,11 +165,11 @@ def data():
 
             fig_hist = px.histogram(
                 df_filtered,
-                x="Cena za metr",
+                x="Cena_mkw",
                 color=color_arg,
                 color_discrete_map=color_map,
                 nbins=40,
-                labels={"Cena za metr": "Cena za m²"})
+                labels={"Cena_mkw": "Cena za m²"})
 
             fig_hist.update_layout(bargap=0.05, yaxis_title="Częstość")
 
@@ -193,16 +185,16 @@ def data():
             if mode == 1:
                 group_cols.append("Miasto")
 
-            df_med = (df_bins.groupby(group_cols)["Cena za metr"].median().reset_index())
+            df_med = (df_bins.groupby(group_cols)["Cena_mkw"].median().reset_index())
 
             fig_med = px.bar(
                 df_med,
                 x="Metraż",
-                y="Cena za metr",
+                y="Cena_mkw",
                 color="Miasto" if mode == 1 else None,
                 color_discrete_map=color_map,
                 barmode="group",
-                labels={"Cena za metr": "Mediana ceny za m²"})
+                labels={"Cena_mkw": "Mediana ceny za m²"})
             st.plotly_chart(fig_med, use_container_width=True)
 
         # wykres 3: top 3 dzielnice
@@ -213,9 +205,9 @@ def data():
             if len(unique_districts) < 6:
                 st.warning("Niewystarczająca ilość informacji do wyświetlenia wykresu.")
             else:
-                median_price = df_filtered["Cena za metr"].median()
+                median_price = df_filtered["Cena_mkw"].median()
                 df_top = top_dzielnice(df_filtered, n=3)
-                df_top["Różnica"] = df_top["Cena za metr"] - median_price
+                df_top["Różnica"] = df_top["Cena_mkw"] - median_price
 
                 fig_top = px.bar(
                     df_top,
@@ -227,7 +219,7 @@ def data():
                         "Różnica": "Odchylenie od mediany cen za m² [zł]",
                         "Dzielnica": "Dzielnica"
                     },
-                    color_discrete_sequence = ["#6096E0", "#053A7A"])
+                    color_discrete_sequence=["#6096E0", "#053A7A"])
 
                 fig_top.update_layout(
                     xaxis_title="Odchylenie od mediany cen za m²",
@@ -250,64 +242,72 @@ def data():
         with cols[1].container(border=True):
             st.subheader("Liczba ofert wg liczby pokoi")
             if mode == 1:
-                rooms_count = (df_filtered.groupby(["Liczba pokoi", "Miasto"])["ID"].count().reset_index(name="Liczba ofert"))
+                rooms_count = (df_filtered.groupby(["Pokoje", "Miasto"])["ID"].count().reset_index(name="Liczba ofert"))
 
                 fig_rooms = px.bar(
                     rooms_count,
-                    x="Liczba pokoi",
+                    x="Pokoje",
                     y="Liczba ofert",
-                    color="Miasto",
-                    color_discrete_map=color_map)
+                    #labels={"Pokoje": "Liczba pokoi"},
+                    color = "Miasto",
+                    color_discrete_map = color_map)
+
+                st.plotly_chart(fig_rooms, use_container_width=True)
                 fig_rooms.update_layout(barmode="stack")
 
             else:
-                rooms_count = (df_filtered.groupby("Liczba pokoi")["ID"].count().reset_index(name="Liczba ofert"))
+                rooms_count = (df_filtered.groupby("Pokoje")["ID"].count().reset_index(name="Liczba ofert"))
 
                 fig_rooms = px.bar(
-                    rooms_count,
-                    x="Liczba pokoi",
-                    y="Liczba ofert",
-                    color_discrete_sequence=["#0041D0"])
+                rooms_count,
+                x = "Pokoje",
+                y = "Liczba ofert",
+                #labels = {"Pokoje": "Liczba pokoi"},
+                color_discrete_sequence = ["#0041D0"])
 
-            st.plotly_chart(fig_rooms, use_container_width=True)
+                st.plotly_chart(fig_rooms, use_container_width=True)
+                fig_rooms.update_layout(barmode="stack")
 
         # wykres 5: cena wg piętra
         with cols[0].container(border=True):
             st.subheader("Cena za m² wg piętra")
 
             def normalize_floor(x):
+                if pd.isna(x):
+                    return None
                 try:
-                    x = int(str(x).replace(">", "").strip())
-                    return x if x <= 10 else ">10"
-                except:
+                    x_int = int(x)
+                    return x_int if x_int <= 10 else ">10"
+                except ValueError:
                     return None
 
-            df_filtered["Piętro"] = df_filtered["Piętro"].apply(normalize_floor)
+            df_filtered["Pietro"] = df_filtered["Pietro"].apply(normalize_floor)
 
             if mode == 1:
-                floor_price = (df_filtered.dropna(subset=["Piętro", "Cena za metr", "Miasto"])
-                               .groupby(["Miasto", "Piętro"], observed=True)["Cena za metr"].median().reset_index())
+                floor_price = (df_filtered.dropna(subset=["Pietro", "Cena_mkw", "Miasto"])
+                               .groupby(["Miasto", "Pietro"], observed=True)[
+                                   "Cena_mkw"].median().reset_index())
 
                 fig_floor = px.bar(
                     floor_price,
-                    x="Piętro",
-                    y="Cena za metr",
+                    x="Pietro",
+                    y="Cena_mkw",
                     color="Miasto",
-                    labels={"Cena za metr": "Mediana ceny za m²"},
+                    labels={"Cena_mkw": "Mediana ceny za m²"},
                     color_discrete_map=color_map)
                 fig_floor.update_layout(barmode="group", xaxis=dict(tickmode="linear", dtick=1))
             else:
                 floor_price = (
-                    df_filtered.dropna(subset=["Piętro", "Cena za metr"])
-                    .groupby("Piętro")["Cena za metr"]
+                    df_filtered.dropna(subset=["Pietro", "Cena_mkw"])
+                    .groupby("Pietro")["Cena_mkw"]
                     .median()
                     .reset_index()
                 )
                 fig_floor = px.bar(
                     floor_price,
-                    x="Piętro",
-                    y="Cena za metr",
-                    labels={"Cena za metr": "Mediana ceny za m²"},
+                    x="Pietro",
+                    y="Cena_mkw",
+                    labels={"Cena_mkw": "Mediana ceny za m²"},
                     color_discrete_sequence=["#0041D0"]
                 )
                 fig_floor.update_layout(xaxis=dict(tickmode="linear", dtick=1))
@@ -321,28 +321,29 @@ def data():
             def add_rok_budowy_bin(df: pd.DataFrame) -> pd.DataFrame:
                 labels = ["<1945", "1945–1970", "1971–1990", "1991–2010", ">2010"]
                 df = df.copy()
-                df["Rok budowy (przedziały)"] = pd.cut(
-                    df["Rok budowy"],
+                df["Rok_przedzialy"] = pd.cut(
+                    df["Rok"],
                     bins=[0, 1945, 1970, 1990, 2010, float("inf")],
                     labels=labels
                 )
-                df["Rok budowy (przedziały)"] = pd.Categorical(
-                    df["Rok budowy (przedziały)"],
+                df["Rok_przedzialy"] = pd.Categorical(
+                    df["Rok_przedzialy"],
                     categories=labels,
                     ordered=True
                 )
                 return df
 
             df_year_bins = add_rok_budowy_bin(df_filtered)
-            year_counts = df_year_bins["Rok budowy (przedziały)"].value_counts().reindex(
+            year_counts = df_year_bins["Rok_przedzialy"].value_counts().reindex(
                 ["<1945", "1945–1970", "1971–1990", "1991–2010", ">2010"]).reset_index()
-            year_counts.columns = ["Rok budowy", "Liczba ofert"]
+            year_counts.columns = ["Rok", "Liczba ofert"]
 
             fig_year = px.pie(
                 year_counts,
-                names="Rok budowy",
+                names="Rok",
+                labels={"Rok": "Rok budowy"},
                 values="Liczba ofert",
-                color_discrete_sequence= ["#A0DCFA", "#6096E0", "#1560C0", "#053A7A", "#052D73"],
+                color_discrete_sequence=["#A0DCFA", "#6096E0", "#1560C0", "#053A7A", "#052D73"],
                 hole=0.3
             )
             fig_year.update_traces(textinfo="percent+label")
@@ -352,13 +353,13 @@ def data():
         with cols[0].container(border=True):
             st.subheader("Cena za m² wg typu ogłoszeniodawcy")
 
-            df_filtered_box = df_filtered.dropna(subset=["Typ ogłoszeniodawcy", "Cena za metr"])
+            df_filtered_box = df_filtered.dropna(subset=["Typ_ogl", "Cena_mkw"])
             fig_owner = px.box(
                 df_filtered_box,
-                x="Typ ogłoszeniodawcy",
-                y="Cena za metr",
-                labels={"Cena za metr": "Cena za m²"},
-                color="Typ ogłoszeniodawcy",
+                x="Typ_ogl",
+                y="Cena_mkw",
+                labels={"Typ_ogl": "Typ ogłoszeniodawcy", "Cena_mkw": "Cena za m²"},
+                color="Typ_ogl",
                 color_discrete_sequence=["#6096E0", "#053A7A"]
             )
             st.plotly_chart(fig_owner, use_container_width=True)
@@ -367,15 +368,16 @@ def data():
         with cols[1].container(border=True):
             st.subheader("Mediana ceny za m² wg miasta i rynku")
 
-            df_grouped = (df_filtered.dropna(subset=["Miasto", "Rynek", "Cena za metr"]).groupby(["Miasto", "Rynek"])["Cena za metr"].mean().reset_index())
+            df_grouped = (df_filtered.dropna(subset=["Miasto", "Rynek", "Cena_mkw"]).groupby(["Miasto", "Rynek"])[
+                              "Cena_mkw"].mean().reset_index())
 
             fig_market = px.bar(
                 df_grouped,
                 x="Miasto",
-                y="Cena za metr",
+                y="Cena_mkw",
                 color="Rynek",
                 barmode="group",
-                labels={"Cena za metr": "Mediana ceny za m²"},
+                labels={"Cena_mkw": "Mediana ceny za m²"},
                 color_discrete_sequence=["#6096E0", "#053A7A"])
 
             st.plotly_chart(fig_market, use_container_width=True)
@@ -389,7 +391,7 @@ def data():
                 ("Garaz/miejsce parkingowe", "Miejsce parkingowe"),
                 ("Winda", "Winda"),
                 ("Ogrodek", "Ogródek"),
-                ("Oddzielna kuchnia", "Oddzielna kuchnia"),
+                ("Kuchnia", "Oddzielna kuchnia"),
                 ("Piwnica/komorka", "Piwnica/komórka")]
 
             for i in range(0, len(amenities), 3):
@@ -399,21 +401,22 @@ def data():
                         percent = (df_filtered[col_name] == 1).mean() * 100
                         st.metric(label=f"{label}", value=f"{percent:.0f} %")
 
-        # wykres 10: stan wykończenia
+        # wykres 10: Stan
         with cols[1].container(border=True):
-            st.subheader("Stan wykończenia mieszkań")
-            finish_counts = df_filtered['Stan wykończenia'].value_counts().reset_index()
-            finish_counts.columns = ['Stan wykończenia', 'Liczba ofert']
+            st.subheader("Stan mieszkań")
+            finish_counts = df_filtered['Stan'].value_counts().reset_index()
+            finish_counts.columns = ['Stan', 'Liczba ofert']
 
             fig_finish = px.pie(
                 finish_counts,
-                names='Stan wykończenia',
+                names='Stan',
                 values='Liczba ofert',
-                #color_discrete_map= {"do zamieszkania":"#A0DCFA", "do wykończenia":"#0041D0", "do remontu":"#052D73", "brak informacji":"#F0F0F0"},
-                color_discrete_sequence= ["#A0DCFA","#0041D0","#052D73", "#F0F0F0"],
+                labels={"Stan": "Stan wykończenia"},
+                color_discrete_sequence=["#A0DCFA", "#0041D0", "#052D73", "#F0F0F0"],
                 hole=0.3)
             fig_finish.update_traces(textinfo='percent+label')
             st.plotly_chart(fig_finish, use_container_width=True)
+
 
     with raw_data:
         st.dataframe(df.style.format(thousands="", precision=0))
