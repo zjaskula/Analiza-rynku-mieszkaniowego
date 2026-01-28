@@ -85,7 +85,7 @@ def base():
             }
             days_since_created_str = days_map.get(time_posted, "")
 
-            # wywołanie skryptów
+            #wywołanie skryptów
             with st.spinner("Trwa pobieranie ofert..."):
                 wynik = subprocess.call([sys.executable, "urls.py", city, days_since_created_str])
                 if wynik != 0:
@@ -159,10 +159,13 @@ def data():
                 df_filtered = df_work[df_work["Miasto"].isin(selected_cities)]
                 color_arg = "Miasto"
             else:
-                miasta = df_work["Miasto"].dropna().unique()
-                selected_city = st.radio("Miasto", options=miasta)
-                df_filtered = df_work[df_work["Miasto"] == selected_city]
+                df_filtered = df
                 color_arg = None
+            #     None
+                # miasta = df_work["Miasto"].dropna().unique()
+                # selected_city = st.radio("Miasto", options=miasta)
+                # df_filtered = df_work[df_work["Miasto"] == selected_city]
+                # color_arg = None
 
         cols = st.columns(2, gap="medium")
         with cols[0].container(border=True):
@@ -224,7 +227,7 @@ def data():
                         "Różnica": "Odchylenie od mediany cen za m² [zł]",
                         "Dzielnica": "Dzielnica"
                     },
-                    color_discrete_map={"Najtańsze": "#38663D", "Najdroższe": "#D60A26"})
+                    color_discrete_sequence = ["#6096E0", "#053A7A"])
 
                 fig_top.update_layout(
                     xaxis_title="Odchylenie od mediany cen za m²",
@@ -271,16 +274,27 @@ def data():
         # wykres 5: cena wg piętra
         with cols[0].container(border=True):
             st.subheader("Cena za m² wg piętra")
+
+            def normalize_floor(x):
+                try:
+                    x = int(str(x).replace(">", "").strip())
+                    return x if x <= 10 else ">10"
+                except:
+                    return None
+
+            df_filtered["Piętro"] = df_filtered["Piętro"].apply(normalize_floor)
+
             if mode == 1:
-                floor_price = (df_filtered.dropna(subset=["Piętro", "Cena za metr"]).groupby(["Piętro", "Miasto"])["Cena za metr"].median().reset_index())
+                floor_price = (df_filtered.dropna(subset=["Piętro", "Cena za metr", "Miasto"])
+                               .groupby(["Miasto", "Piętro"], observed=True)["Cena za metr"].median().reset_index())
+
                 fig_floor = px.bar(
                     floor_price,
                     x="Piętro",
                     y="Cena za metr",
                     color="Miasto",
                     labels={"Cena za metr": "Mediana ceny za m²"},
-                    color_discrete_map=color_map
-                )
+                    color_discrete_map=color_map)
                 fig_floor.update_layout(barmode="group", xaxis=dict(tickmode="linear", dtick=1))
             else:
                 floor_price = (
@@ -395,7 +409,8 @@ def data():
                 finish_counts,
                 names='Stan wykończenia',
                 values='Liczba ofert',
-                color_discrete_sequence= ["#A0DCFA","#0041D0","#052D73"],
+                #color_discrete_map= {"do zamieszkania":"#A0DCFA", "do wykończenia":"#0041D0", "do remontu":"#052D73", "brak informacji":"#F0F0F0"},
+                color_discrete_sequence= ["#A0DCFA","#0041D0","#052D73", "#F0F0F0"],
                 hole=0.3)
             fig_finish.update_traces(textinfo='percent+label')
             st.plotly_chart(fig_finish, use_container_width=True)
