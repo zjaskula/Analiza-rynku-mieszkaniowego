@@ -43,37 +43,32 @@ Do Architektury rozwoju musisz dopisa Streamlit Architektury uruchomieniowej dop
 ### Architektura rozwoju
 *Technologie i narzędzia wykorzystywane na etapie tworzenia, testowania i wersjonowania aplikacji.*
 
-| Nazwa technologii | Przeznaczenie |
-|------------------|--------------|
-| **Python** | Główny język programowania aplikacji |
-| **PyCharm 2025.1.1.1** | Zintegrowane środowisko programistyczne (IDE) |
-| **GitHub** | Repozytorium kodu źródłowego i kontrola wersji |
-| **ChatGPT** | Pomoc przy projektowaniu struktury kodu oraz rozwiązywaniu problemów |
-| **pandas** | Przetwarzanie danych, agregacje, statystyki opisowe |
-| **plotly.express** | Tworzenie interaktywnych wykresów |
-| **BeautifulSoup** | Parsowanie kodu HTML w procesie scrapowania |
-| **selenium** | Automatyzacja przeglądarki i dynamiczne pobieranie ofert |
-| **requests** | Obsługa zapytań HTTP |
-| **json** | Obsługa danych i konfiguracji w formacie JSON |
-| **sys** | Zarządzanie środowiskiem uruchomieniowym |
-| **subprocess** | Wywoływanie procesów systemowych |
-| **time** | Kontrola opóźnień i synchronizacja scrapowania |
+| Nazwa technologii | Przeznaczenie                                                                        | Wersja    |
+|-----------------|--------------------------------------------------------------------------------------|-----------|
+| **Python** | Główny język programowania aplikacji                                                 | 3.12      |
+| **PyCharm** | Zintegrowane środowisko programistyczne (IDE)                                        | 2025.1.1.1 |
+| **GitHub** | Repozytorium kodu źródłowego i kontrola wersji                                       |           |
+| **ChatGPT** | Pomoc przy projektowaniu struktury kodu rozwiązywaniu problemów oraz tworzeniu README |           |
+| **pandas** | Przetwarzanie danych, agregacje, statystyki opisowe                                  | 2.3.3.    |
+| **plotly.express** | Tworzenie interaktywnych wykresów                                                    | 6.5.2     |
+| **BeautifulSoup** | Parsowanie kodu HTML w procesie scrapowania                                          | 4.14.3    |
+| **selenium** | Automatyzacja przeglądarki i dynamiczne pobieranie ofert                             | 4.40.0    |
+| **requests** | Obsługa zapytań HTTP                                                                 | 2.32.5    |
+| **json** | Obsługa danych i konfiguracji w formacie JSON                                        |           |
+| **sys** | Zarządzanie środowiskiem uruchomieniowym                                             |           |
+| **subprocess** | Wywoływanie procesów systemowych                                                     |           |
+| **time** | Kontrola opóźnień i synchronizacja scrapowania                                       |           |
 
 ### Architektura uruchomieniowa
 *Elementy niezbędne do działania aplikacji w środowisku użytkownika końcowego.*
 
-| Nazwa technologii | Przeznaczenie |
-|------------------|--------------|
-| **Python** | Środowisko uruchomieniowe aplikacji |
-| **Streamlit** | Framework webowy do budowy i renderowania dashboardu |
-| **Przeglądarka internetowa** | Interfejs dostępu do aplikacji |
-| **Pliki `.xlsx`** | Trwałe przechowywanie danych historycznych |
-| **Otodom.pl** | Źródło danych ofertowych (scraping bieżący) |
-
-Aplikacja uruchamiana jest lokalnie poprzez interpreter Pythona i framework Streamlit. Interfejs użytkownika renderowany jest w przeglądarce internetowej, gdzie dynamicznie generowany jest dashboard prezentujący wyniki analiz.
+| Nazwa technologii | Przeznaczenie                       | Wersja   |
+|------------------|-------------------------------------|----------|
+| **Python** | Środowisko uruchomieniowe aplikacji |3.12|
+| **Przeglądarka internetowa** | Interfejs dostępu do aplikacji      ||
+|**Biblioteki z architektury rozwoju** | Realizacja funkcji aplikacji    ||
 
 ## Testy
-
 ### Scenariusze testów
 
 | ID       | Wymaganie  | Nazwa scenariusza                      | Kroki do wykonania                                                                                                       | Oczekiwany rezultat                                                                                  |
