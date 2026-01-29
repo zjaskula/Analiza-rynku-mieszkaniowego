@@ -62,7 +62,7 @@ def base():
 
         if submitted and show_all:
             if choice != "–" or time_posted != "–":
-                st.warning("Wybierz albo konkretne miasto i ramy czasowe, albo zaznaczyć checkbox.")
+                st.warning("Wybierz albo konkretne miasto i ramy czasowe, albo zaznacz checkbox.")
                 return False
 
     if submitted:
