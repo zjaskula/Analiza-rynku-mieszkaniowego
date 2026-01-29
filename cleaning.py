@@ -84,7 +84,7 @@ df.loc[df['Pietro'] == 'brak informacji', 'Pietro'] = ''
 
 # Czynsz - brak informacji, usunięcie [zł]
 df.loc[df['Czynsz'] == 'brak informacji', 'Czynsz'] = ''
-df['Czynsz'] = df['Czynsz'].str[:-2]
+df['Czynsz'] = df['Czynsz'].str[:-11]
 df.loc[df['Czynsz'] == '0', 'Czynsz'] = ''
 df['Czynsz'] = df['Czynsz'].str.replace(' ','')
 df['Czynsz'] = pd.to_numeric(df['Czynsz'])
