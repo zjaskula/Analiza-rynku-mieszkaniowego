@@ -1,1 +1,65 @@
-from selenium import webdriverimport timefrom bs4 import BeautifulSoupimport pandas as pdimport jsondef write_to_excel(file, df, sheet_name):    with pd.ExcelWriter(file, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer: df.to_excel(writer, index=False, sheet_name=sheet_name)driver = webdriver.Chrome()driver.maximize_window()time.sleep(2)file_path = 'data-links.txt'with open("output.json", "w", encoding="utf-8") as f:    f.write("[")    first = True    with open(file_path, "r", encoding="utf-8") as file:        for line in file:            try:                url = line.strip()                driver.get(url)                html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")                soup = BeautifulSoup(html, "html.parser")                price = soup.find("strong", {"data-cy": "adPageHeaderPrice"}).get_text(strip=True)                price_per_meter = soup.find("div", class_=["css-jfh229", "elm6lnc4"]).find("div").get_text(strip=True)                address = soup.find("div", {"data-sentry-component": "MapLink"}).get_text(strip=True)                id = soup.find("p", {"data-sentry-element": "DetailsProperty"}).get_text(strip=True)                details_base = soup.find("div", {"data-sentry-component": "AdDetailsBase"})                description = soup.find("div", {"data-sentry-element": "DescriptionWrapper"}).get_text(strip=True)                seller = (                    soup.find('div', class_='css-2ttjsi e1wfx0fl2').find('a').get('href')                    if soup.find('div', class_='css-2ttjsi e1wfx0fl2')                       and soup.find('div', class_='css-2ttjsi e1wfx0fl2').find('a')                    else None)                if details_base is None:                    print("No details base found")                    continue                data = details_base.find_all("div", {"data-sentry-element": "ItemGridContainer"})                json_data = {"ID": id, "URL": url, "Cena": price, "Cena_mkw": price_per_meter, "Adres": address, "Opis": description, "Sprzedawca":seller}                for detail in data:                    children = detail.find_all("div")                    if len(children) >= 2:                        key = children[0].text.rstrip(":")                        value = children[1].text.strip()                        json_data[key] = value                if not first:                    f.write(",")                first = False                f.write(json.dumps(json_data, ensure_ascii=False))                print(json_data)                time.sleep(5)            except Exception as e:                print("EXCEPTION !!! " + str(e))                continue    f.write("]")driver.quit()
+from selenium import webdriver
+import time
+from bs4 import BeautifulSoup
+import pandas as pd
+import json
+
+def write_to_excel(file, df, sheet_name):
+    with pd.ExcelWriter(file, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer: df.to_excel(writer, index=False, sheet_name=sheet_name)
+
+driver = webdriver.Chrome()
+driver.maximize_window()
+time.sleep(2)
+
+file_path = 'data-links.txt'
+
+with open("output.json", "w", encoding="utf-8") as f:
+    f.write("[")
+    first = True
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            try:
+                url = line.strip()
+                driver.get(url)
+                html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+                soup = BeautifulSoup(html, "html.parser")
+
+                price = soup.find("strong", {"data-cy": "adPageHeaderPrice"}).get_text(strip=True)
+                price_per_meter = soup.find("div", class_=["css-jfh229", "elm6lnc4"]).find("div").get_text(strip=True)
+                address = soup.find("div", {"data-sentry-component": "MapLink"}).get_text(strip=True)
+                id = soup.find("p", {"data-sentry-element": "DetailsProperty"}).get_text(strip=True)
+                details_base = soup.find("div", {"data-sentry-component": "AdDetailsBase"})
+                description = soup.find("div", {"data-sentry-element": "DescriptionWrapper"}).get_text(strip=True)
+                seller = (
+                    soup.find('div', class_='css-2ttjsi e1wfx0fl2').find('a').get('href')
+                    if soup.find('div', class_='css-2ttjsi e1wfx0fl2')
+                       and soup.find('div', class_='css-2ttjsi e1wfx0fl2').find('a')
+                    else None)
+
+                if details_base is None:
+                    print("No details base found")
+                    continue
+
+                data = details_base.find_all("div", {"data-sentry-element": "ItemGridContainer"})
+
+                json_data = {"ID": id, "URL": url, "Cena": price, "Cena_mkw": price_per_meter, "Adres": address, "Opis": description, "Sprzedawca":seller}
+
+                for detail in data:
+                    children = detail.find_all("div")
+                    if len(children) >= 2:
+                        key = children[0].text.rstrip(":")
+                        value = children[1].text.strip()
+                        json_data[key] = value
+
+                if not first:
+                    f.write(",")
+                first = False
+
+                f.write(json.dumps(json_data, ensure_ascii=False))
+                print(json_data)
+                time.sleep(5)
+            except Exception as e:
+                print("EXCEPTION !!! " + str(e))
+                continue
+    f.write("]")
+driver.quit()
